@@ -192,6 +192,10 @@ module SolidusSubscriptions
       installments.last.fulfilled? ? 'success' : 'failed'
     end
 
+    def send_reminder_email
+      Spree::SubscriptionMailer.reminder_email(self).deliver_later
+    end
+
     private
 
     def check_successive_skips_exceeded

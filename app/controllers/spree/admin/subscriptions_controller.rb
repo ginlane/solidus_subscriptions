@@ -56,6 +56,13 @@ module Spree
         redirect_to spree.admin_subscriptions_path, notice: notice
       end
 
+      def resend
+        SubscriptionMailer.reminder_email(@subscription, true).deliver_later
+        flash[:success] = 'Subscription reminder sent'
+
+        redirect_to(spree.edit_admin_subscription_path(@subscription))
+      end
+
       private
 
       def model_class
