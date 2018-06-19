@@ -12,7 +12,7 @@ RSpec.describe SolidusSubscriptions::Processor, :checkout do
     end
   end
 
-  let!(:actionable_subscriptions) { create_list(:subscription, 2, :actionable, user: user) }
+  let!(:actionable_subscriptions) { create_list(:subscription, 2, :actionable, user: user, reminded: true) }
   let!(:pending_cancellation_subscriptions) do
     create_list(:subscription, 2, :pending_cancellation, user: user)
   end
@@ -28,9 +28,9 @@ RSpec.describe SolidusSubscriptions::Processor, :checkout do
     )
   end
 
-  let!(:future_subscriptions) { create_list(:subscription, 2, :not_actionable) }
-  let!(:canceled_subscriptions) { create_list(:subscription, 2, :canceled) }
-  let!(:inactive) { create_list(:subscription, 2, :inactive) }
+  let!(:future_subscriptions) { create_list(:subscription, 2, :not_actionable, user: user) }
+  let!(:canceled_subscriptions) { create_list(:subscription, 2, :canceled, user: user) }
+  let!(:inactive) { create_list(:subscription, 2, :inactive, user: user) }
 
   let!(:successful_installments) { create_list :installment, 2, :success }
   let!(:failed_installments) do
@@ -95,6 +95,20 @@ RSpec.describe SolidusSubscriptions::Processor, :checkout do
       expect { subject }.
         to change { sub.reload.state }.
         from('active').to('inactive')
+    end
+
+    it 'marks future subscriptions as reminded' do
+      reminded = future_subscriptions.first
+      expect { subject }.
+        to change { reminded.reload.reminded }.
+        from(false).to(true)
+    end
+
+    it 'prepares actionable subscriptions to be reminded in the future' do
+      actionable = actionable_subscriptions.first
+      expect { subject }.
+        to change { actionable.reload.reminded }.
+        from(true).to(false)
     end
 
     context 'the subscriptions have different shipping addresses' do

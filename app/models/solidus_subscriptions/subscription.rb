@@ -33,6 +33,16 @@ module SolidusSubscriptions
         where.not(state: ["canceled", "inactive"])
     end)
 
+    scope :remindable, (lambda do
+      where("#{table_name}.actionable_date > ? AND #{table_name}.actionable_date <= ? AND reminded = ?", Time.zone.now, Time.zone.now + Config.reminder_notice, false).
+        where.not(state: ["canceled", "inactive"])
+    end)
+
+    def remind!
+      send_reminder_email
+      update!(reminded: true)
+    end
+
     # Find subscriptions based on their processing state. This state is not a
     # model attrubute.
     #
@@ -168,7 +178,7 @@ module SolidusSubscriptions
     # @return [Date] The next date after the current actionable_date this
     # subscription will be eligible to be processed.
     def advance_actionable_date
-      update! actionable_date: next_actionable_date
+      update! actionable_date: next_actionable_date, reminded: false
       actionable_date
     end
 

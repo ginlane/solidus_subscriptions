@@ -57,6 +57,11 @@ module SolidusSubscriptions
     # instance
     def build_jobs
       users.map do |user|
+        remindable_subscriptions = remindable_subscriptions(user)
+        if remindable_subscriptions.any?
+          SubscriptionReminderJob.perform_later remindable_subscriptions.map(&:id)
+        end
+
         installemts_by_address_and_user = installments(user).group_by do |i|
           i.subscription.shipping_address_id
         end
@@ -77,12 +82,23 @@ module SolidusSubscriptions
         group_by(&:user_id)
     end
 
+    def remindable_subscriptions_by_id
+      @remindable_subscriptions_by_id ||= Subscription.
+        remindable.
+        where(user_id: user_ids).
+        group_by(&:user_id)
+    end
+
     def retry_installments
       @failed_installments ||= Installment.
         actionable.
         includes(:subscription).
         where(solidus_subscriptions_subscriptions: { user_id: user_ids }).
         group_by { |i| i.subscription.user_id }
+    end
+
+    def remindable_subscriptions(user)
+      remindable_subscriptions_by_id.fetch(user.id, [])
     end
 
     def installments(user)
