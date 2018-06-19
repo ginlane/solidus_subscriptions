@@ -93,5 +93,8 @@ module SolidusSubscriptions
         shipping_address_attributes: Spree::PermittedAttributes.address_attributes
       ]
     end
+
+    # Time before a subscriptions actionable date to send a reminder email
+    mattr_accessor(:reminder_notice) { 4.days }
   end
 end

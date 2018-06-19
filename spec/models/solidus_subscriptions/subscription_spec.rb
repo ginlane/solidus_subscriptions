@@ -280,4 +280,14 @@ RSpec.describe SolidusSubscriptions::Subscription, type: :model do
     subject { described_class.processing_states }
     it { is_expected.to match_array [:pending, :success, :failed] }
   end
+
+  describe '#send_reminder_email' do
+    it 'should send a reminder email' do
+      mail_message = double "Mail::Message"
+      expect(Spree::SubscriptionMailer).to receive(:reminder_email).with(subject).and_return mail_message
+      expect(mail_message).to receive :deliver_later
+
+      subject.send_reminder_email
+    end
+  end
 end

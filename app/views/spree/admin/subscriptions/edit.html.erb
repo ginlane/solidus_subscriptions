@@ -2,6 +2,7 @@
 
 <% content_for :page_actions do %>
   <li><%= link_to t('.back'), admin_subscriptions_path, class: 'btn btn-primary' %></li>
+  <li><%= button_to 'Send Reminder', resend_admin_subscription_url(@subscription), method: :post, class: 'btn btn-primary' %></li>
 <% end %>
 
 <% content_for :sidebar_title do %>

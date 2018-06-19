@@ -20,6 +20,7 @@ Spree::Core::Engine.routes.draw do
       delete :cancel, on: :member
       post :activate, on: :member
       post :skip, on: :member
+      post :resend, on: :member
     end
   end
 end
