@@ -32,6 +32,7 @@ module SolidusSubscriptions
           ).
           where(
             SolidusSubscriptions::Subscription.actionable.arel.constraints.reduce(:and).
+              or(SolidusSubscriptions::Subscription.remindable.arel.constraints.reduce(:and)).
               or(SolidusSubscriptions::Installment.actionable.arel.constraints.reduce(:and))
           ).
           distinct.
