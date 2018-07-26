@@ -45,6 +45,7 @@ RSpec.describe SolidusSubscriptions::Api::V1::SubscriptionsController, type: :co
 
     let(:subscription_params) do
       {
+        interval_length: 7,
         line_items_attributes: [{
           id: subscription.line_items.first.id,
           quantity: 6
@@ -65,6 +66,11 @@ RSpec.describe SolidusSubscriptions::Api::V1::SubscriptionsController, type: :co
     context 'when the subscription belongs to the user' do
       let!(:subscription) { create :subscription, :with_line_item, user: user }
       it { is_expected.to be_success }
+
+      it "sets the interval length" do
+        subject
+        expect(JSON.parse(response.body)["interval_length"]).to eq subscription_params[:interval_length]
+      end
 
       context 'when the params are not valid' do
         let(:subscription_params) do
